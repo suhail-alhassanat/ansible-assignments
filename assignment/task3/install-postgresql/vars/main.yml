@@ -1,0 +1,5 @@
+---
+postgresql_version: "13.3"  
+postgresql_database: MyDB
+postgresql_user: user
+postgresql_password: user@123

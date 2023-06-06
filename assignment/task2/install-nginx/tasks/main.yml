@@ -1,0 +1,26 @@
+---
+- name: Add epel-release repo
+  yum:
+    name: epel-release
+    state: present
+
+- name: Install nginx
+  yum:
+    name: nginx
+    state: present
+  notify: start ngiinx  
+
+- name: Configure Nginx
+  template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: allow the required port for nginx
+  firewalld:
+    port: 80/tcp
+    zone: public
+    state: enabled
+    permanent: true
+  notify: 
+    - firewall_reload

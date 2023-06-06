@@ -1,0 +1,80 @@
+---
+- name: Install dependencies
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - gcc
+    - make  
+    - readline-devel
+    - zlib-devel
+    - openssl-devel
+    - libxml2-devel
+    - libxslt-devel
+    - openldap-devel
+    - pam-devel
+    - systemd-devel
+
+- name: Download and extract PostgreSQL source
+  unarchive:
+    src: "https://ftp.postgresql.org/pub/source/v{{ postgresql_version }}/postgresql-{{ postgresql_version }}.tar.gz"
+    dest: /usr/local/src/postgresql-{{ postgresql_version }}
+    remote_src: yes
+    creates: /usr/local/src/postgresql-{{ postgresql_version }}
+
+- name: Configure and compile PostgreSQL
+  command: >
+    ./configure --prefix=/usr/local/pgsql-{{ postgresql_version }} --with-openssl --with-pam
+    chdir: /usr/local/src/postgresql-{{ postgresql_version }}
+    creates: /usr/local/src/postgresql-{{ postgresql_version }}/config.status
+
+- name: Make and install PostgreSQL
+  command: >
+    make && make install
+    chdir: /usr/local/src/postgresql-{{ postgresql_version }}
+    creates: /usr/local/pgsql-{{ postgresql_version }}
+
+- name: Add PostgreSQL bin directory to PATH
+  lineinfile:
+    dest: /etc/profile.d/postgres.sh
+    line: "export PATH=$PATH:/usr/local/pgsql-{{ postgresql_version }}/bin"
+    create: yes
+
+- name: Create data directory
+  file:
+    path: /usr/local/pgsql-{{ postgresql_version }}/data
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+
+- name: Initialize PostgreSQL database
+  command: >
+     /usr/local/pgsql-{{ postgresql_version }}/bin/initdb -D /usr/local/pgsql-{{ postgresql_version }}/data
+     creates: /usr/local/pgsql-{{ postgresql_version }}/data/PG_VERSION
+  notify: Start PostgreSQL
+
+- meta: flush_handlers
+    
+- name: Create PostgreSQL database
+  postgresql_db:
+    name: "{{ postgresql_database }}"
+    state: present
+
+- name: Create PostgreSQL user
+  postgresql_user:
+    name: "{{ postgresql_user }}"
+    password: "{{ postgresql_password | password_hash('md5') }}"
+    login_user: postgres
+    login_password: ""
+    state: present
+  
+- name: Open PostgreSQL port in firewall
+  firewalld:
+    port: 5432/tcp
+    zone: public
+    state: enabled
+    permanent: true
+  notify: firewall reload
+- meta: flush_handlers
+

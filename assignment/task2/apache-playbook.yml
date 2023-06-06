@@ -1,0 +1,4 @@
+---
+- hosts: apache-nodes
+  roles: 
+    - install-apache

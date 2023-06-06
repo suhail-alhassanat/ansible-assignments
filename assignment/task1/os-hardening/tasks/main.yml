@@ -1,0 +1,34 @@
+---
+- name: Ensure firewalld is installed
+  yum:
+    name: firewalld
+    state: present
+
+- name: Enable and start firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Get current firewalld open ports
+  command: firewall-cmd --list-ports
+  register: open_ports
+
+- name: allow only required ports of firewall
+  firewalld:
+    port: "{{ item.split(' ')[0] }}"
+    zone: public
+    state: disabled
+    permanent: true
+  loop: "{{ open_ports.stdout_lines | map('regex_replace', '^', 'port:') | map('from_yaml') }}"
+  
+
+- name: allow only required ports of firewall
+  firewalld:
+    port: 22/tcp
+    zone: public
+    state: enabled
+    permanent: true
+  notify: 
+    - firewall_reload
+

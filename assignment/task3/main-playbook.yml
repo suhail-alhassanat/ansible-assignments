@@ -1,0 +1,5 @@
+---
+- hosts: primeryDB
+  roles:
+    - install-postgresql
+    - import-database

@@ -1,0 +1,9 @@
+---
+- name: restart Nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: true
+
+- name: firewall_reload
+  command: firewall-cmd --reload

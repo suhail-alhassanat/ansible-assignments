@@ -1,0 +1,4 @@
+---
+- hosts: nginx-node
+  roles: 
+    - install-nginx

@@ -1,0 +1,5 @@
+---
+- hosts: nodes
+  roles:
+    #- os-updating
+    - os-hardening

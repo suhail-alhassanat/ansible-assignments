@@ -1,0 +1,20 @@
+---
+- name: Install Apache packages
+  yum:
+    name: httpd
+    state: present
+
+- name: Copy Index Page
+  template:
+    src: index.html
+    dest: /var/www/html/index.html
+  notify: restart apache
+
+- name: allow the required port for apache
+  firewalld:
+    port: 80/tcp
+    zone: public
+    state: enabled
+    permanent: true
+  notify: 
+    - firewall_reload

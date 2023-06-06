@@ -1,0 +1,3 @@
+---
+- name: updata all packages
+  yum: name=* state=latest

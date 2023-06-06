@@ -1,0 +1,9 @@
+---
+- name: restart apache
+  service:
+    name: httpd
+    state: restarted
+    enabled: true
+
+- name: firewall_reload
+  command: firewall-cmd --reload

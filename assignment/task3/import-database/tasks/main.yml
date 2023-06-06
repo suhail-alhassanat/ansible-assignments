@@ -1,0 +1,7 @@
+---
+- name: Import sample database
+  postgresql_db:
+    name: MyDB
+    login_unix_socket: "/var/run/postgresql/.s.PGSQL.5432"
+    state: import
+    target: dvdrental.tar

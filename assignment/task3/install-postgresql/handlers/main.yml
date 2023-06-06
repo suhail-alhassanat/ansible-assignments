@@ -1,0 +1,9 @@
+---
+- name: Start PostgreSQL
+  service:
+    name: postgresql-{{ postgresql_version }}
+    state: started
+    enabled: yes
+
+- name: firewall_reload
+  command: firewall-cmd --reload
